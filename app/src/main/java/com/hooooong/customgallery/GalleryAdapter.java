@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.hooooong.customgallery.model.Photo;
+
 import java.util.List;
 
 /**
@@ -20,15 +22,20 @@ import java.util.List;
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> {
 
     private Context context;
-    private List<String> pathList;
+    //private List<String> pathList;
+    private List<Photo> photoList;
 
     public GalleryAdapter(Context context) {
         this.context = context;
     }
 
-
-    public void setData(List<String> pathList){
+    /*public void setData(List<String> pathList){
         this.pathList = pathList;
+        notifyDataSetChanged();
+    }*/
+
+    public void setData(List<Photo> pathList){
+        this.photoList = pathList;
         notifyDataSetChanged();
     }
 
@@ -40,44 +47,57 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
 
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-        String path = pathList.get(position);
-        holder.setImageUri(Uri.parse(path));
+
+        Photo photo = photoList.get(position);
+        holder.setTextName(photo.getImageName());
+        holder.setTextDate(photo.getImageDate());
+        holder.setImageUri(photo.getImagePath(), photo.getThumbnailPath());
+
+        /*String path = pathList.get(position);
+        holder.setImageUri(Uri.parse(path));*/
         //holder.setTextDate();
     }
 
     @Override
     public int getItemCount() {
-        return pathList.size();
+        //return pathList.size();
+        return photoList.size();
     }
 
     class Holder extends RecyclerView.ViewHolder {
-        private Uri uri;
+        private Uri imageUri;
         private ImageView imageItem;
-        private TextView textDate;
+        private TextView  textName, textDate;
 
         public Holder(View itemView) {
             super(itemView);
             imageItem = (ImageView)itemView.findViewById(R.id.imageItem);
+            textName = (TextView)itemView.findViewById(R.id.textName);
             textDate = (TextView)itemView.findViewById(R.id.textDate);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent();
-                    intent.putExtra("imagePath", uri.getPath());
+                    intent.putExtra("imagePath", imageUri.getPath());
                     ((Activity)context).setResult(Activity.RESULT_OK, intent);
                     ((Activity) context).finish();
                 }
             });
         }
 
-        public void setImageUri(Uri uri) {
-            this.uri = uri;
-            imageItem.setImageURI(uri);
+        public void setImageUri(String imagePath, String thumbnailPath){
+            this.imageUri = Uri.parse(imagePath);
+            imageItem.setImageURI(Uri.parse(thumbnailPath));
         }
+
 
         public void setTextDate(String date) {
             textDate.setText(date);
+        }
+
+        public void setTextName(String name){
+            textName.setText(name);
         }
 
 
