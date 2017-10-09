@@ -86,7 +86,6 @@ public class GalleryActivity extends AppCompatActivity {
         };
 
         Cursor cursor = resolver.query(uri, projections, null, null, null);
-
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 int index = cursor.getColumnIndex(projections[0]);
@@ -113,6 +112,7 @@ public class GalleryActivity extends AppCompatActivity {
     }
     // 이 경우에는 원본이미지가 너무 크기 때문에 성능상 적절하지 않다.
 
+
     private String uriToThumbnail(String imageId) {
 
         String thumbnailPath = null;
@@ -127,15 +127,15 @@ public class GalleryActivity extends AppCompatActivity {
                 , new String[]{imageId},
                 null);
 
-        if (cursor == null) {
-
-        } else if (cursor.moveToFirst()) {
+        if (cursor.moveToFirst()) {
             int index = cursor.getColumnIndex(projections[0]);
             thumbnailPath = cursor.getString(index);
-        } else {
+            cursor.close();
+        }/*else {
             MediaStore.Images.Thumbnails.getThumbnail(resolver, Long.parseLong(imageId), MediaStore.Images.Thumbnails.MINI_KIND, null);
-            uriToThumbnail(imageId);
-        }
+            cursor.close();
+            return uriToThumbnail(imageId);
+        }*/
         return thumbnailPath;
     }
 }

@@ -88,7 +88,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
 
         public void setImageUri(String imagePath, String thumbnailPath){
             this.imageUri = Uri.parse(imagePath);
-            imageItem.setImageURI(Uri.parse(thumbnailPath));
+            if(thumbnailPath != null){
+                imageItem.setImageURI(Uri.parse(thumbnailPath));
+            }else{
+                imageItem.setImageURI(null);
+            }
         }
 
 
