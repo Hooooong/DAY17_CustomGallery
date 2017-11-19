@@ -3,14 +3,17 @@ package com.hooooong.customgallery;
 
 import android.Manifest;
 import android.content.Intent;
-import android.net.Uri;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.hooooong.customgallery.model.Photo;
+
+import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity {
     private static final int REQ_GALLERY = 999;
 
-    private ImageView imageView;
+    private TextView textView;
 
 
     public MainActivity() {
@@ -20,7 +23,7 @@ public class MainActivity extends BaseActivity {
     @Override
     public void init() {
         setContentView(R.layout.activity_main);
-        imageView = (ImageView) findViewById(R.id.imageView);
+        textView =(TextView)findViewById(R.id.textView);
     }
 
     public void onGallery(View view) {
@@ -36,9 +39,13 @@ public class MainActivity extends BaseActivity {
             case REQ_GALLERY:
                 if (resultCode == RESULT_OK) {
                     if (data != null) {
-                        String imagePath = data.getStringExtra("imagePath");
-                        Uri uri = Uri.parse(imagePath);
-                        imageView.setImageURI(uri);
+                        ArrayList<Photo> photoList = (ArrayList<Photo>) data.getSerializableExtra("PHOTO");
+                        String imagePath ="";
+                        for (Photo photo: photoList) {
+                            imagePath += photo.getImagePath() + ", ";
+                        }
+
+                        textView.setText(imagePath);
                     }
                 }
                 break;

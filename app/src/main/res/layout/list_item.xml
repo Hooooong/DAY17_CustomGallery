@@ -1,28 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="120dp"
+    android:padding="1dp"
+    >
+
 
     <ImageView
-        android:id="@+id/imageItem"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
-        android:layout_gravity="center"
-        app:srcCompat="@mipmap/ic_launcher" />
-
-    <TextView
-        android:id="@+id/textName"
+        android:id="@+id/imgPhoto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="TextView" />
+        android:layout_height="match_parent"
+        android:background="@color/colorSliver"
+        android:scaleType="fitXY" />
 
-    <TextView
-        android:id="@+id/textDate"
+    <RelativeLayout
+        android:id="@+id/layoutSelect"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="TextView" />
-</LinearLayout>
+        android:layout_height="match_parent"
+        android:background="#404286f4"
+        android:visibility="invisible">
+
+        <TextView
+            android:id="@+id/textNumber"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorBlue"
+            android:gravity="center"
+            android:text="123"
+            android:textColor="#FFFFFF" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

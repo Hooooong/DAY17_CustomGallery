@@ -1,18 +1,18 @@
 package com.hooooong.customgallery;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.hooooong.customgallery.model.Photo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,22 +22,75 @@ import java.util.List;
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> {
 
     private Context context;
-    //private List<String> pathList;
-    private List<Photo> photoList;
+    private List<Photo> photoList = new ArrayList<>();
+    private ArrayList<Photo> selectPhotoList;
+    private GalleryListener galleryListener;
 
+    /**
+     * 생성자
+     *
+     * @param context
+     */
     public GalleryAdapter(Context context) {
         this.context = context;
+        this.selectPhotoList = new ArrayList<>();
+        this.galleryListener = (GalleryListener) context;
     }
 
-    /*public void setData(List<String> pathList){
-        this.pathList = pathList;
-        notifyDataSetChanged();
-    }*/
-
-    public void setData(List<Photo> pathList){
-        this.photoList = pathList;
+    public void setPhotoList(List<Photo> photoList) {
+        this.photoList = photoList;
         notifyDataSetChanged();
     }
+
+    /**
+     * PhotoList 반환
+     *
+     * @return
+     */
+    public List<Photo> getPhotoList() {
+        return photoList;
+    }
+
+    /**
+     * 선택된 PhotoList 반환
+     *
+     * @return
+     */
+    public ArrayList<Photo> getSelectPhotoList() {
+        return selectPhotoList;
+    }
+
+    /**
+     * 선택한 Photo 추가하기
+     *
+     * @param photo
+     */
+    public void addSelectPhotoList(Photo photo) {
+        if (selectPhotoList.size() < 10) {
+            // 10 보다 작을 때
+            selectPhotoList.add(photo);
+            notifyItemChanged(photoList.indexOf(photo));
+            galleryListener.changeView(selectPhotoList.size());
+        } else {
+            // 10보다 클 때
+            galleryListener.selectError();
+        }
+    }
+
+    /**
+     * 선택한 Photo 지우기
+     *
+     * @param photo
+     */
+    public void removeSelectPhotoList(Photo photo) {
+        selectPhotoList.remove(photo);
+        notifyItemChanged(photoList.indexOf(photo));
+        for (Photo item: selectPhotoList) {
+            notifyItemChanged(photoList.indexOf(item));
+        }
+        galleryListener.changeView(selectPhotoList.size());
+    }
+
 
     @Override
     public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -47,15 +100,16 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
 
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-
         Photo photo = photoList.get(position);
-        holder.setTextName(photo.getImageName());
-        holder.setTextDate(photo.getImageDate());
-        holder.setImageUri(photo.getImagePath(), photo.getThumbnailPath());
+        holder.setImageView(photo.getImagePath()) ;
+        holder.setPosition(position);
 
-        /*String path = pathList.get(position);
-        holder.setImageUri(Uri.parse(path));*/
-        //holder.setTextDate();
+        if(selectPhotoList.contains(photo)){
+            holder.setLayout(View.VISIBLE);
+            holder.setTextNumber(selectPhotoList.indexOf(photo)+1);
+        }else{
+            holder.setLayout(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -65,45 +119,48 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
     }
 
     class Holder extends RecyclerView.ViewHolder {
-        private Uri imageUri;
-        private ImageView imageItem;
-        private TextView  textName, textDate;
+        private int position;
+        private ImageView imgPhoto;
+        private RelativeLayout layoutSelect;
+        private TextView textNumber;
 
-        public Holder(View itemView) {
+        Holder(View itemView) {
             super(itemView);
-            imageItem = (ImageView)itemView.findViewById(R.id.imageItem);
-            textName = (TextView)itemView.findViewById(R.id.textName);
-            textDate = (TextView)itemView.findViewById(R.id.textDate);
+            imgPhoto = (ImageView) itemView.findViewById(R.id.imgPhoto);
+            layoutSelect = (RelativeLayout) itemView.findViewById(R.id.layoutSelect);
+            textNumber = (TextView) itemView.findViewById(R.id.textNumber);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent();
-                    intent.putExtra("imagePath", imageUri.getPath());
-                    ((Activity)context).setResult(Activity.RESULT_OK, intent);
-                    ((Activity) context).finish();
+                    if (galleryListener != null) {
+                        galleryListener.PhotoClick(position);
+                    }
                 }
             });
         }
 
-        public void setImageUri(String imagePath, String thumbnailPath){
-            this.imageUri = Uri.parse(imagePath);
-            if(thumbnailPath != null){
-                imageItem.setImageURI(Uri.parse(thumbnailPath));
-            }else{
-                imageItem.setImageURI(null);
+        void setTextNumber(int number) {
+            textNumber.setText(number + "");
+        }
+
+        void setImageView(String path) {
+            Glide.with(context)
+                    .load(path)
+                    .centerCrop()
+                    .into(imgPhoto);
+        }
+
+        void setLayout(int layout) {
+            if (layout == View.VISIBLE) {
+                layoutSelect.setVisibility(View.VISIBLE);
+            } else {
+                layoutSelect.setVisibility(View.INVISIBLE);
             }
         }
 
-
-        public void setTextDate(String date) {
-            textDate.setText(date);
+        void setPosition(int position) {
+            this.position = position;
         }
-
-        public void setTextName(String name){
-            textName.setText(name);
-        }
-
-
     }
 }

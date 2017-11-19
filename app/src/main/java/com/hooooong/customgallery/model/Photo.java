@@ -1,17 +1,24 @@
 package com.hooooong.customgallery.model;
 
+import java.io.Serializable;
+
 /**
  * Created by Android Hong on 2017-10-07.
  */
 
-public class Photo {
+public class Photo implements Serializable{
 
     private String imagePath;
     private String thumbnailPath;
     private String imageName;
     private String imageDate;
 
+
     public Photo() {
+    }
+
+    public Photo(String imagePath){
+        this.imagePath = imagePath;
     }
 
     public Photo(String imagePath, String thumbnailPath, String imageName, String imageDate) {
@@ -52,4 +59,5 @@ public class Photo {
     public void setImageDate(String imageDate) {
         this.imageDate = imageDate;
     }
+
 }

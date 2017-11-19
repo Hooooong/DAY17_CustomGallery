@@ -1,141 +1,175 @@
 package com.hooooong.customgallery;
 
-import android.content.ContentResolver;
-import android.database.Cursor;
-import android.net.Uri;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hooooong.customgallery.model.Photo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GalleryActivity extends AppCompatActivity {
+public class GalleryActivity extends AppCompatActivity implements GalleryListener {
 
-    private RecyclerView recyclerView;
+    private static final String TAG = "GalleryActivity";
+    private Menu menu;
+    private Toolbar toolbar;
+    private RecyclerView recyclerGallery;
     private GalleryAdapter galleryAdapter;
+    private ProgressBar progressBar;
+    private LinearLayout countLayout;
+    private TextView textTitle, textCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
-        init();
+
+        initLayout();
+        initGalleryAdapter();
+        setGallery();
     }
 
-    private void init() {
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+    private void initLayout() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        countLayout = (LinearLayout) findViewById(R.id.countLayout);
+        textTitle = (TextView) findViewById(R.id.textTitle);
+        textCount = (TextView) findViewById(R.id.textCount);
+
+        recyclerGallery = (RecyclerView) findViewById(R.id.recyclerGallery);
         galleryAdapter = new GalleryAdapter(this);
-        recyclerView.setAdapter(galleryAdapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-
-        //galleryAdapter.setData(load());
-        galleryAdapter.setData(load());
+        recyclerGallery.setAdapter(galleryAdapter);
+        recyclerGallery.setLayoutManager(new GridLayoutManager(this, 3));
     }
 
-    // http://shygiants.github.io/android/2016/01/13/contentresolver.html
-    // Content Resolver 를 통해 Image 목록을 가져온다.
-    /*private List<String> load(){
-        List<String> list = new ArrayList<>();
-        ContentResolver resolver = getContentResolver();
-        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        String projections[] = {
-                // 이미지는 Data 칼럼에 존재
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DATA
-        };
-
-        Cursor cursor = resolver.query(uri, projections, null, null, null);
-
-        if(cursor != null ){
-            while (cursor.moveToNext()){
-                int index = cursor.getColumnIndex(projections[0]);
-                // Uri 를 String 으로 받을 경우 String(Path) 로 받는다.
-                String path = cursor.getString(index);
-
-                index = cursor.getColumnIndex(projections[1]);
-                // Uri 를 String 으로 받을 경우 String(Path) 로 받는다.
-                String id = cursor.getString(index);
-                String thumbnailPath = uriToThumbnail(id);
-
-                Photo
-
-
-                list.add(path);
-            }
-        }
-        return list;
-    }*/
-
-    private List<Photo> load() {
-        List<Photo> list = new ArrayList<>();
-        ContentResolver resolver = getContentResolver();
-        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        String projections[] = {
-                // 이미지는 Data 칼럼에 존재
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DATA,
-                MediaStore.Images.Media.TITLE,
-                MediaStore.Images.Media.DATE_ADDED
-        };
-
-        Cursor cursor = resolver.query(uri, projections, null, null, null);
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                int index = cursor.getColumnIndex(projections[0]);
-                // Uri 를 String 으로 받을 경우 String(Path) 로 받는다.
-                String id = cursor.getString(index);
-
-                index = cursor.getColumnIndex(projections[1]);
-                // Uri 를 String 으로 받을 경우 String(Path) 로 받는다.
-                String imagePath = cursor.getString(index);
-
-                String thumbnailPath = uriToThumbnail(id);
-
-                index = cursor.getColumnIndex(projections[2]);
-                String name = cursor.getString(index);
-
-                index = cursor.getColumnIndex(projections[3]);
-                String date = cursor.getString(index);
-
-                Photo photo = new Photo(imagePath, thumbnailPath, name, date);
-                list.add(photo);
-            }
-        }
-        return list;
+    private void initGalleryAdapter() {
+        galleryAdapter = new GalleryAdapter(this);
+        recyclerGallery.setAdapter(galleryAdapter);
+        recyclerGallery.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
+        recyclerGallery.setItemAnimator(new DefaultItemAnimator());
     }
-    // 이 경우에는 원본이미지가 너무 크기 때문에 성능상 적절하지 않다.
+
+    /**
+     * Gallery 사진 불러오기
+     * <p>
+     * Thread 로 돌린다.
+     */
+    @SuppressLint("StaticFieldLeak")
+    private void setGallery() {
+        new AsyncTask<String, Void, List<Photo>>() {
+            @Override
+            protected void onPreExecute() {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            protected List<Photo> doInBackground(String... strings) {
+                return GalleryUtil.getAllPhotoPathList(GalleryActivity.this);
+            }
+
+            @Override
+            protected void onPostExecute(List<Photo> result) {
+                progressBar.setVisibility(View.GONE);
+                galleryAdapter.setPhotoList(result);
+            }
+        }.execute();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
+        getMenuInflater().inflate(R.menu.menu_gallery, menu);
+        return true;
+    }
 
 
-    private String uriToThumbnail(String imageId) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_next:
+                if (item.getIntent() != null) {
+                    // 선택된 사진이 있으면 다음 Intent 로 이동한다.
+                    ArrayList<Photo> selectPhotoList = galleryAdapter.getSelectPhotoList();
+                    setResult(RESULT_OK, item.getIntent().putExtra("PHOTO", selectPhotoList));
+                    finish();
+                }
+                break;
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
-        String thumbnailPath = null;
+    @Override
+    public void PhotoClick(int position) {
+        Photo photo = galleryAdapter.getPhotoList().get(position);
+        List<Photo> selectPhotoList = galleryAdapter.getSelectPhotoList();
 
-        ContentResolver resolver = getContentResolver();
-        Uri uri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
-        String[] projections = {MediaStore.Images.Thumbnails.DATA};
+        if (selectPhotoList.contains(photo)) {
+            galleryAdapter.removeSelectPhotoList(photo);
+        } else {
+            galleryAdapter.addSelectPhotoList(photo);
+        }
+    }
 
-        Cursor cursor = resolver.query(uri
-                , projections
-                , MediaStore.Images.Thumbnails.IMAGE_ID + "= ?"
-                , new String[]{imageId},
-                null);
+    @Override
+    public void changeView(int count) {
+        if (count == 0) {
+            textTitle.setVisibility(View.VISIBLE);
+            countLayout.setVisibility(View.GONE);
+            // icon 변경 및 intent 설정
+            changeMenu(R.id.action_next, R.drawable.ic_keyboard_arrow_right_false, false);
+        } else {
+            textTitle.setVisibility(View.GONE);
+            countLayout.setVisibility(View.VISIBLE);
+            // icon 변경 및 intent 설정
+            changeMenu(R.id.action_next, R.drawable.ic_keyboard_arrow_right_true, true);
 
-        if (cursor.moveToFirst()) {
-            int index = cursor.getColumnIndex(projections[0]);
-            thumbnailPath = cursor.getString(index);
-            cursor.close();
-        }/*else {
-            MediaStore.Images.Thumbnails.getThumbnail(resolver, Long.parseLong(imageId), MediaStore.Images.Thumbnails.MINI_KIND, null);
-            cursor.close();
-            return uriToThumbnail(imageId);
-        }*/
-        return thumbnailPath;
+            String cnt = Integer.toString(count);
+            textCount.setText(cnt);
+        }
+    }
+
+    @Override
+    public void selectError() {
+        Toast.makeText(this, "사진은 10장까지만 선택하실 수 있어요", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Menu Icon 이미지 변경 및 Intent 설정
+     *
+     * @param id      menu id 값
+     * @param iconRes 변경할 Resource 값
+     */
+    private void changeMenu(int id, int iconRes, boolean check) {
+        MenuItem item = menu.findItem(id);
+        item.setIcon(iconRes);
+        if (check) {
+            Intent intent = new Intent();
+            item.setIntent(intent);
+        } else {
+            item.setIntent(null);
+        }
     }
 }
