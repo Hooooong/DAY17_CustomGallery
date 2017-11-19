@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -67,6 +68,7 @@ public class GalleryActivity extends AppCompatActivity implements GalleryListene
         recyclerGallery.setAdapter(galleryAdapter);
         recyclerGallery.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
         recyclerGallery.setItemAnimator(new DefaultItemAnimator());
+        ((SimpleItemAnimator) recyclerGallery.getItemAnimator()).setSupportsChangeAnimations(false);
     }
 
     /**
@@ -146,7 +148,6 @@ public class GalleryActivity extends AppCompatActivity implements GalleryListene
             countLayout.setVisibility(View.VISIBLE);
             // icon 변경 및 intent 설정
             changeMenu(R.id.action_next, R.drawable.ic_keyboard_arrow_right_true, true);
-
             String cnt = Integer.toString(count);
             textCount.setText(cnt);
         }

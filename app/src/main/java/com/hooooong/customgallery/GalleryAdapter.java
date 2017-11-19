@@ -70,7 +70,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
         // 10 보다 작을 때
         if(selectPhotoList.size() < 10){
             selectPhotoList.add(photo);
-            notifyItemChanged(photoList.indexOf(photo),"choose");
+            notifyItemChanged(photoList.indexOf(photo));
             galleryListener.changeView(selectPhotoList.size());
         }else{
             galleryListener.selectError();
@@ -85,9 +85,9 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
      */
     public void removeSelectPhotoList(Photo photo) {
         selectPhotoList.remove(photo);
-        notifyItemChanged(photoList.indexOf(photo),"choose");
+        notifyItemChanged(photoList.indexOf(photo));
         for (Photo item : selectPhotoList) {
-            notifyItemChanged(photoList.indexOf(item),"choose");
+            notifyItemChanged(photoList.indexOf(item));
         }
         galleryListener.changeView(selectPhotoList.size());
     }
@@ -129,7 +129,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
             holder.setLayout(View.INVISIBLE);
         }
     }
-
     @Override
     public int getItemCount() {
         return photoList.size();
@@ -179,4 +178,5 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
             this.position = position;
         }
     }
+
 }
