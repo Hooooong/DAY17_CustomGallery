@@ -68,6 +68,7 @@ public class GalleryActivity extends AppCompatActivity implements GalleryListene
         recyclerGallery.setAdapter(galleryAdapter);
         recyclerGallery.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
         recyclerGallery.setItemAnimator(new DefaultItemAnimator());
+        // RecyclerView 애니메이션 제거
         ((SimpleItemAnimator) recyclerGallery.getItemAnimator()).setSupportsChangeAnimations(false);
     }
 

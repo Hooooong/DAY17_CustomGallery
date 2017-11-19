@@ -75,7 +75,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
         }else{
             galleryListener.selectError();
         }
-
     }
 
     /**
