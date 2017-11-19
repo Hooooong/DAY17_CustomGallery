@@ -2,6 +2,7 @@ package com.hooooong.customgallery;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,15 +67,15 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
      * @param photo
      */
     public void addSelectPhotoList(Photo photo) {
-        if (selectPhotoList.size() < 10) {
-            // 10 보다 작을 때
+        // 10 보다 작을 때
+        if(selectPhotoList.size() < 10){
             selectPhotoList.add(photo);
-            notifyItemChanged(photoList.indexOf(photo));
+            notifyItemChanged(photoList.indexOf(photo),"choose");
             galleryListener.changeView(selectPhotoList.size());
-        } else {
-            // 10보다 클 때
+        }else{
             galleryListener.selectError();
         }
+
     }
 
     /**
@@ -84,9 +85,9 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
      */
     public void removeSelectPhotoList(Photo photo) {
         selectPhotoList.remove(photo);
-        notifyItemChanged(photoList.indexOf(photo));
-        for (Photo item: selectPhotoList) {
-            notifyItemChanged(photoList.indexOf(item));
+        notifyItemChanged(photoList.indexOf(photo),"choose");
+        for (Photo item : selectPhotoList) {
+            notifyItemChanged(photoList.indexOf(item),"choose");
         }
         galleryListener.changeView(selectPhotoList.size());
     }
@@ -98,23 +99,39 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
         return new Holder(view);
     }
 
+/*    @Override
+    public void onBindViewHolder(Holder holder, int position, List<Object> payloads) {
+        Photo photo = photoList.get(position);
+        if(payloads.contains("choose")){
+            if (selectPhotoList.contains(photo)) {
+                holder.setLayout(View.VISIBLE);
+                holder.setTextNumber(selectPhotoList.indexOf(photo) + 1);
+            } else {
+                holder.setLayout(View.INVISIBLE);
+            }
+        }else{
+            super.onBindViewHolder(holder,position,payloads);
+
+        }
+    }*/
+
     @Override
     public void onBindViewHolder(Holder holder, int position) {
+        Log.e("GalleryActivity", "onBindViewHolder: 호출 " );
         Photo photo = photoList.get(position);
-        holder.setImageView(photo.getImagePath()) ;
+        holder.setImageView(photo.getImagePath());
         holder.setPosition(position);
 
-        if(selectPhotoList.contains(photo)){
+        if (selectPhotoList.contains(photo)) {
             holder.setLayout(View.VISIBLE);
-            holder.setTextNumber(selectPhotoList.indexOf(photo)+1);
-        }else{
+            holder.setTextNumber(selectPhotoList.indexOf(photo) + 1);
+        } else {
             holder.setLayout(View.INVISIBLE);
         }
     }
 
     @Override
     public int getItemCount() {
-        //return pathList.size();
         return photoList.size();
     }
 
@@ -130,13 +147,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
             layoutSelect = (RelativeLayout) itemView.findViewById(R.id.layoutSelect);
             textNumber = (TextView) itemView.findViewById(R.id.textNumber);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (galleryListener != null) {
-                        galleryListener.PhotoClick(position);
-                    }
+            itemView.setOnClickListener((v) -> {
+                if (galleryListener != null) {
+                    galleryListener.PhotoClick(position);
                 }
+
             });
         }
 
@@ -145,6 +160,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
         }
 
         void setImageView(String path) {
+            Log.e("GalleryActivity", "setImageView: 호출 " );
             Glide.with(context)
                     .load(path)
                     .centerCrop()
