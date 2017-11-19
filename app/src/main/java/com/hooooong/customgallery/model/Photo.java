@@ -13,7 +13,6 @@ public class Photo implements Serializable{
     private String imageName;
     private String imageDate;
 
-
     public Photo() {
     }
 

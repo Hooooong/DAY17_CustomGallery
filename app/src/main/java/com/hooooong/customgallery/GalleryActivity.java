@@ -127,7 +127,6 @@ public class GalleryActivity extends AppCompatActivity implements GalleryListene
     @Override
     public void PhotoClick(int position) {
         Photo photo = galleryAdapter.getPhotoList().get(position);
-
         List<Photo> selectPhotoList = galleryAdapter.getSelectPhotoList();
 
         if (selectPhotoList.contains(photo)) {

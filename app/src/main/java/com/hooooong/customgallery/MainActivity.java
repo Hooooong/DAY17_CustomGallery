@@ -29,7 +29,6 @@ public class MainActivity extends BaseActivity {
     public void onGallery(View view) {
         Intent intent = new Intent(this, GalleryActivity.class);
         startActivityForResult(intent, REQ_GALLERY);
-
     }
 
     @Override
@@ -44,7 +43,6 @@ public class MainActivity extends BaseActivity {
                         for (Photo photo: photoList) {
                             imagePath += photo.getImagePath() + ", ";
                         }
-
                         textView.setText(imagePath);
                     }
                 }

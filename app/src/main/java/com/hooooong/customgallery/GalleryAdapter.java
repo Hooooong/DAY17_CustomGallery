@@ -98,25 +98,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
         return new Holder(view);
     }
 
-/*    @Override
-    public void onBindViewHolder(Holder holder, int position, List<Object> payloads) {
-        Photo photo = photoList.get(position);
-        if(payloads.contains("choose")){
-            if (selectPhotoList.contains(photo)) {
-                holder.setLayout(View.VISIBLE);
-                holder.setTextNumber(selectPhotoList.indexOf(photo) + 1);
-            } else {
-                holder.setLayout(View.INVISIBLE);
-            }
-        }else{
-            super.onBindViewHolder(holder,position,payloads);
-
-        }
-    }*/
-
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-        Log.e("GalleryActivity", "onBindViewHolder: 호출 " );
         Photo photo = photoList.get(position);
         holder.setImageView(photo.getImagePath());
         holder.setPosition(position);
@@ -145,11 +128,13 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.Holder> 
             layoutSelect = (RelativeLayout) itemView.findViewById(R.id.layoutSelect);
             textNumber = (TextView) itemView.findViewById(R.id.textNumber);
 
-            itemView.setOnClickListener((v) -> {
-                if (galleryListener != null) {
-                    galleryListener.PhotoClick(position);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (galleryListener != null) {
+                        galleryListener.PhotoClick(position);
+                    }
                 }
-
             });
         }
 
