@@ -27,6 +27,7 @@ public class GalleryUtil {
 
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         String[] projection = {
+                MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.DATE_MODIFIED
         };
@@ -37,10 +38,10 @@ public class GalleryUtil {
                 null,
                 null,
                 projection[1] + " DESC");
-        int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-
         while (cursor.moveToNext()) {
-            Photo photo = new Photo(cursor.getString(columnIndexData));
+            Photo photo = new Photo();
+            int index = cursor.getColumnIndex(MediaStore.MediaColumns.DATA);
+            photo.setImagePath(cursor.getString(index));
             photoList.add(photo);
         }
         cursor.close();
